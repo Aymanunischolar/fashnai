@@ -5,8 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ExternalLink, Star, TrendingUp, TrendingDown, Package, ShoppingBag } from 'lucide-react';
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fashnai-api.onrender.com';
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 interface ProductListing {
   website_name: string;
   product_url: string;
