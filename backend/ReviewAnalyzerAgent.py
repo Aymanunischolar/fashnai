@@ -21,12 +21,22 @@ logger.addHandler(handler)
 
 load_dotenv()
 
-# Use paid Gemini API key for all agents
-llm = Gemini(
-    id='gemini-2.0-flash',
-    api_key=os.getenv("GOOGLE_API_KEY"),
-    vertexai=False
-)
+TEXT_MODEL_CANDIDATES = []
+for candidate in [
+    os.getenv("GOOGLE_GEMINI_MODEL", "gemini-2.5-flash-lite"),
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+]:
+    if candidate not in TEXT_MODEL_CANDIDATES:
+        TEXT_MODEL_CANDIDATES.append(candidate)
+
+
+def create_llm(model_id: str) -> Gemini:
+    return Gemini(
+        id=model_id,
+        api_key=os.getenv("GOOGLE_API_KEY"),
+        vertexai=False
+    )
 
 
 class SentimentScore(BaseModel):
@@ -47,7 +57,8 @@ class ReviewAnalysis(BaseModel):
     sources_analyzed: List[str] = Field(..., description="URLs of review sources analyzed")
 
 
-def review_analyzer_agent() -> Agent:
+def review_analyzer_agent(model_id: str | None = None) -> Agent:
+    llm = create_llm(model_id or TEXT_MODEL_CANDIDATES[0])
     agent = Agent(
         name="Fashion Review Analyzer Agent",
         model=llm,
@@ -126,6 +137,23 @@ def review_analyzer_agent() -> Agent:
     return agent
 
 
+def _is_transient_model_error(message: str) -> bool:
+    lowered = message.lower()
+    return any(
+        phrase in lowered
+        for phrase in (
+            "high demand",
+            "temporarily unavailable",
+            "service unavailable",
+            "not available",
+            "unavailable",
+            "try again later",
+            "resource_exhausted",
+            "quota exceeded",
+        )
+    )
+
+
 def analyze_reviews(product_url: str, max_retries: int = 3) -> RunOutput:
     payload = dedent(f"""
         product_url: {product_url}
@@ -133,20 +161,32 @@ def analyze_reviews(product_url: str, max_retries: int = 3) -> RunOutput:
         Please analyze customer reviews for this fashion product from multiple sources.
     """)
 
-    agent = review_analyzer_agent()
+    last_response = None
 
-    for attempt in range(1, max_retries + 1):
-        response = agent.run(input=payload, session_id=str(uuid.uuid4()))
-        try:
-            _ = ReviewAnalysis.model_validate(response.content)
-            return response
-        except Exception as e:
-            if attempt < max_retries:
-                logger.error(f"Attempt {attempt} failed: {e}. Retrying...")
-                continue
-            else:
-                logger.error(f"All {max_retries} attempts failed. Returning last response.")
+    for model_id in TEXT_MODEL_CANDIDATES:
+        agent = review_analyzer_agent(model_id)
+        for attempt in range(1, max_retries + 1):
+            response = agent.run(input=payload, session_id=str(uuid.uuid4()))
+            last_response = response
+            try:
+                _ = ReviewAnalysis.model_validate(response.content)
                 return response
+            except Exception as e:
+                response_text = response.content if isinstance(response.content, str) else str(e)
+                if _is_transient_model_error(response_text):
+                    logger.error(f"Model {model_id} hit a transient provider error: {response_text[:200]}")
+                    break
+                if attempt < max_retries:
+                    logger.error(f"Attempt {attempt} failed: {e}. Retrying...")
+                    continue
+                logger.error(f"All {max_retries} attempts failed for model {model_id}.")
+                break
+
+    if last_response is not None:
+        logger.error("All model candidates failed. Returning last response.")
+        return last_response
+
+    raise RuntimeError("No Gemini model candidates were available for review analysis")
 
 
 if __name__ == "__main__":

@@ -99,7 +99,12 @@ def health_check():
     return {
         "status": "healthy", 
         "service": "FashnAI API",
-        "model": "gemini-3-flash-preview"
+        "model": "gemini-2.5-flash-lite",
+        "model_candidates": [
+            "gemini-2.5-flash-lite",
+            "gemini-2.5-flash",
+            "gemini-2.5-pro"
+        ]
     }
 
 
