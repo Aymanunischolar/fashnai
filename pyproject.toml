@@ -17,13 +17,14 @@ dependencies = [
   "google-genai>=1.0.0",
   "google-search-results>=2.4.2",
   "pandas>=2.2.3",
+  "pandas-stubs==2.3.3.260113",
   "pillow>=11.0.0",
   "pydantic>=2.11.4",
   "python-dotenv>=1.1.0",
   "python-multipart>=0.0.20",
   "scikit-learn>=1.6.1",
   "sqlalchemy>=2.0.40",
-  "uvicorn>=0.34.2",
+  "uvicorn>=0.34.2"
 ]
 
 [tool.vercel]
