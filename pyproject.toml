@@ -1,6 +1,5 @@
 [tool.vercel]
 entrypoint = "backend.api:app"
-[project]
 name = "fashnai"
 version = "0.1.0"
 description = "FashnAI - AI-powered fashion product comparison platform"

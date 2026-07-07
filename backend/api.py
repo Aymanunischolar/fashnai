@@ -7,10 +7,10 @@ from contextlib import asynccontextmanager
 import asyncio
 import logging
 
-from PriceAgent import compare_prices, PriceComparisonResult
-from ReviewAnalyzerAgent import analyze_reviews, ReviewAnalysis
-from ProductSpecsAgent import extract_specifications, ProductSpecification
-from VirtualTryOnAgent import virtual_tryon, VirtualTryOnResult
+from .PriceAgent import compare_prices, PriceComparisonResult
+from .ReviewAnalyzerAgent import analyze_reviews, ReviewAnalysis
+from .ProductSpecsAgent import extract_specifications, ProductSpecification
+from .VirtualTryOnAgent import virtual_tryon, VirtualTryOnResult
 
 logger = logging.getLogger(__name__)
 
