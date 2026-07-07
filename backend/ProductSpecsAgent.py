@@ -146,7 +146,7 @@ def product_specs_agent(model_id: str | None = None) -> Agent:
             - Include technical details when available
         """),
         output_schema=ProductSpecification,
-        db=SqliteDb(session_table="product_specs_agent", db_file="tmp/agents.db"),
+        db=SqliteDb(session_table="product_specs_agent", db_file="/tmp/agents.db"),
         add_datetime_to_context=True,
         use_json_mode=True,
     )

@@ -130,7 +130,7 @@ def review_analyzer_agent(model_id: str | None = None) -> Agent:
             - Balance positive and negative feedback objectively
         """),
         output_schema=ReviewAnalysis,
-        db=SqliteDb(session_table="review_analyzer_agent", db_file="tmp/agents.db"),
+        db=SqliteDb(session_table="review_analyzer_agent", db_file="/tmp/agents.db"),
         add_datetime_to_context=True,
         use_json_mode=True,
     )

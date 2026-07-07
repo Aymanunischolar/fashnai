@@ -214,7 +214,7 @@ def virtual_tryon_agent(model_id: str | None = None) -> Agent:
             - Include honest warnings about potential issues
         """),
         output_schema=VirtualTryOnResult,
-        db=SqliteDb(session_table="virtual_tryon_agent", db_file="tmp/agents.db"),
+        db=SqliteDb(session_table="virtual_tryon_agent", db_file="/tmp/agents.db"),
         add_datetime_to_context=True,
         use_json_mode=True,
     )

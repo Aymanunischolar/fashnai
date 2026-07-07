@@ -38,7 +38,7 @@ def create_llm(model_id: str) -> Gemini:
         vertexai=False
     )
 
-db = SqliteDb()  # SQLite instance created directly
+db = SqliteDb(db_file="/tmp/agents.db")
 
 agent = Agent(
     model=create_llm(TEXT_MODEL_CANDIDATES[0]),
@@ -168,7 +168,7 @@ def price_agent(model_id: str | None = None) -> Agent:
               and explain in the search_summary why no other listings were found
         """),
         output_schema=PriceComparisonResult,
-        db=SqliteDb(session_table="price_comparison_agent", db_file="tmp/agents.db"),
+        db=SqliteDb(session_table="price_comparison_agent", db_file="/tmp/agents.db"),
         add_datetime_to_context=True,
         use_json_mode=True,
     )
